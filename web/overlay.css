@@ -36,7 +36,8 @@ body { overflow: hidden; }
   padding: 20px 32px 8px; display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden;
 }
 
-.tools { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; }
+/* The clip box reaches 8 px left of the text, so the running dot's pulse ring (up to 6 px) is not cut. */
+.tools { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; padding-left: 8px; margin-left: -8px; }
 .tools-head { display: flex; align-items: baseline; padding-bottom: 6px; }
 .lbl { font-size: 18px; letter-spacing: 0.16em; font-weight: 600; opacity: 0.7; }
 .count { margin-left: auto; font-variant-numeric: tabular-nums; }
