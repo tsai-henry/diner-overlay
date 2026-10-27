@@ -1,6 +1,6 @@
 {
   "name": "diner-overlay",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Launch-webcast graphics for a robot agent's tool calls and a run's subtasks: one page for OBS and for rendered video layers.",
   "license": "Apache-2.0",
   "type": "module",
