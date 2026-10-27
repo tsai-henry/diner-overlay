@@ -1,0 +1,90 @@
+/* diner-overlay: launch-webcast graphics for an agent's tool calls and a run's subtasks.
+   1920×1080, transparent. Text floor 18 px, 24 px from every edge. The tool pane is 420 px wide and
+   always 520 px tall; overlay.js drops the oldest rows that do not fit. Nothing here animates: every
+   motion, the dot's pulse included, is computed from T by viewAt and set through --pulse and inline styles. */
+
+@font-face { font-family: "D-DIN"; font-weight: 400; src: url("fonts/d-din-400.otf") format("opentype"); }
+/* D-DIN has no semibold from Datto, so 600 uses the bold file. Licence in fonts/OFL.txt. */
+@font-face { font-family: "D-DIN"; font-weight: 600 700; src: url("fonts/d-din-700.otf") format("opentype"); }
+
+:root {
+  --pane-w: 420px;
+  --pane-h: 520px;
+  --edge: 24px;
+  --amber: #ffb547;
+  --pulse: 0;
+}
+
+html, body { margin: 0; padding: 0; background: transparent; }
+body { overflow: hidden; }
+
+.stage {
+  position: relative; width: 1920px; height: 1080px; overflow: hidden;
+  font-family: "D-DIN", system-ui, sans-serif; color: #ffffff; box-sizing: border-box;
+  background: transparent center / cover no-repeat;
+}
+
+.shade {
+  position: absolute; left: 0; top: 860px; width: 1920px; height: 220px;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+}
+
+.panel { background: rgba(0,0,0,0.5); border-radius: 6px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+.pane {
+  position: absolute; left: var(--edge); bottom: var(--edge); width: var(--pane-w); height: var(--pane-h);
+  padding: 20px 32px 8px; display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden;
+}
+
+.tools { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; }
+.tools-head { display: flex; align-items: baseline; padding-bottom: 6px; }
+.lbl { font-size: 18px; letter-spacing: 0.16em; font-weight: 600; opacity: 0.7; }
+.count { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.row { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.12); }
+.row.first { border-top: none; }
+.head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.name { font-size: 22px; font-weight: 600; letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cur { font-size: 30px; font-weight: 700; }
+.stage-name { font-size: 20px; }
+.stage-name.live { font-size: 24px; }
+.took { margin-left: auto; font-size: 18px; letter-spacing: 0.08em; opacity: 0.75; font-variant-numeric: tabular-nums; flex: none; }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #fff; flex: none;
+  box-shadow: 0 0 0 calc(3px + 3px * var(--pulse)) rgba(255,255,255,calc(0.32 - 0.16 * var(--pulse)));
+}
+.dot.small { width: 8px; height: 8px; }
+.kv { font-size: 18px; letter-spacing: 0.06em; display: flex; flex-wrap: wrap; gap: 2px 18px; opacity: 0.92; }
+.kv:empty { display: none; }
+.kv i { font-style: normal; opacity: 0.55; letter-spacing: 0.1em; margin-right: 6px; }
+.warn { color: var(--amber); }
+.stages { margin-left: 12px; padding-left: 16px; border-left: 1px solid rgba(255,255,255,0.25); }
+.stages .row.first { padding-top: 2px; }
+.stages:empty, .hidden { display: none !important; }
+.idle { font-size: 22px; opacity: 0.6; padding: 10px 0; }
+
+.progress {
+  position: absolute; bottom: var(--edge);
+  left: calc(var(--edge) * 2 + var(--pane-w)); width: calc(1920px - var(--edge) * 3 - var(--pane-w));
+  display: flex; flex-direction: column; gap: 14px; text-shadow: 0 1px 8px rgba(0,0,0,0.7);
+}
+.progress-head { display: flex; align-items: baseline; gap: 28px; }
+.clock { font-size: 40px; font-weight: 600; line-height: 1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.subtask { font-size: 22px; letter-spacing: 0.2em; font-weight: 600; }
+.signal { font-size: 22px; letter-spacing: 0.2em; font-weight: 700; color: var(--amber); margin-left: auto; font-variant-numeric: tabular-nums; }
+.segs, .phases { display: flex; gap: 6px; }
+.seg { flex: 1; border-radius: 4px; height: 10px; background: rgba(255,255,255,0.22); overflow: hidden; }
+.seg.done { background: #fff; }
+.seg.warn { background: var(--amber); }
+.fill { height: 10px; background: #fff; border-radius: 4px; width: 0; }
+.ph { flex: 1; font-size: 26px; letter-spacing: 0.12em; font-weight: 600; white-space: nowrap; }
+.ph.pending { opacity: 0.5; }
+.ph b { font-weight: 600; opacity: 0.75; margin-left: 10px; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+
+/* &play=1 only, for checking a replay by eye. Never in a render. */
+.player {
+  position: absolute; top: var(--edge); right: var(--edge); display: flex; gap: 12px; align-items: center;
+  font-size: 20px; padding: 8px 12px;
+}
+.player button { font: inherit; font-weight: 600; color: #fff; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 4px 12px; cursor: pointer; }
+.player input { width: 360px; }

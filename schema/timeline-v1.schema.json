@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tsai-henry/diner-overlay/schema/timeline-v1.schema.json",
+  "title": "diner-overlay timeline v1",
+  "description": "Everything the overlay draws for one run, on one time axis. See TIMELINE.md.",
+  "type": "object",
+  "required": ["format", "segments", "calls"],
+  "properties": {
+    "format": { "const": "overlay-timeline/1" },
+    "clock": {
+      "description": "Live only: the axis time when the server built this timeline.",
+      "type": "object", "required": ["t"], "properties": { "t": { "type": "number" } }
+    },
+    "start": { "description": "Axis time the run started, or null when no run.", "type": ["number", "null"] },
+    "end": { "description": "Axis time the run ended, or null while it runs.", "type": ["number", "null"] },
+    "timer": {
+      "description": "Live only: the run's timer read at axis time `at`. Without it the timer is T - start, held at end.",
+      "type": "object", "required": ["at", "value", "running"],
+      "properties": { "at": { "type": "number" }, "value": { "type": "number" }, "running": { "type": "boolean" } }
+    },
+    "segments": {
+      "description": "The subtasks along the bar, on the timer's seconds.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["label", "line", "start", "end"],
+        "properties": {
+          "label": { "type": "string", "description": "One word under the segment, such as WALK." },
+          "line": { "type": "string", "description": "The line above the bar while this segment is current." },
+          "start": { "type": ["number", "null"], "description": "null: not started." },
+          "end": { "type": ["number", "null"], "description": "null: not done." },
+          "budget": { "type": ["number", "null"], "description": "Expected seconds; a segment with no end fills against it, capped at 92 %." },
+          "status": { "type": "string", "description": "\"failure\" turns a done segment amber." }
+        }
+      }
+    },
+    "calls": {
+      "description": "Tool calls on the axis, with their fields already worded.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "name", "start", "end", "status"],
+        "properties": {
+          "id": { "type": ["number", "string"] },
+          "parent": { "type": ["number", "string", "null"], "description": "The call this is a stage of." },
+          "name": { "type": "string" },
+          "start": { "type": ["number", "null"] },
+          "end": { "type": ["number", "null"] },
+          "status": { "enum": ["running", "finished", "failed"] },
+          "hidden": { "type": "boolean", "description": "Counted, never shown." },
+          "drop_at": { "type": "number", "description": "Axis time from which the call is no longer shown." },
+          "fields": { "$ref": "#/$defs/fields", "description": "Shown once the call is done." },
+          "running_fields": { "$ref": "#/$defs/fields", "description": "Shown while the call runs." }
+        }
+      }
+    },
+    "outages": {
+      "description": "Periods with no signal. Inside one the overlay holds at `start`.",
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["kind", "start", "end"],
+        "properties": {
+          "kind": { "type": "string", "description": "\"robot\", \"dashboard\" or your own word." },
+          "start": { "type": "number" },
+          "end": { "type": ["number", "null"], "description": "null: not over." },
+          "since": { "type": "number", "description": "Where the SIGNAL LOST count starts; start by default." }
+        }
+      }
+    },
+    "show": {
+      "type": "object",
+      "properties": {
+        "hidden_between_runs": { "type": "boolean", "default": true },
+        "outro_after_s": { "type": "number", "default": 5 }
+      }
+    }
+  },
+  "$defs": {
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["key", "value"],
+        "properties": { "key": { "type": "string" }, "value": { "type": "string" }, "warn": { "type": "boolean" } }
+      }
+    }
+  }
+}

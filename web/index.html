@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>diner-overlay</title>
+<!-- diner-overlay (README.md). Live by default, from /api/overlay/stream (?api= names another base);
+     ?replay=<timeline.json>&t=<seconds>[&play=1] draws a recorded run at one moment. -->
+<link rel="preload" href="fonts/d-din-400.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="fonts/d-din-700.otf" as="font" type="font/otf" crossorigin>
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="shade"></div>
+  <div class="panel pane" id="pane"></div>
+  <div class="progress" id="progress"></div>
+</div>
+<script type="module" src="overlay.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+diner-overlay
+Copyright 2026 Henry Tsai
+
+This product is licensed under the Apache License, Version 2.0 (LICENSE).
+
+It bundles the D-DIN typeface in web/fonts/, Copyright (c) 2017 Datto Inc., with Reserved Font Name
+D-DIN, licensed under the SIL Open Font License, Version 1.1 (web/fonts/OFL.txt). The fonts are not
+covered by the Apache License.

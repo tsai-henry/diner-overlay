@@ -1,0 +1,30 @@
+{
+  "name": "diner-overlay",
+  "version": "0.1.0",
+  "description": "Launch-webcast graphics for a robot agent's tool calls and a run's subtasks: one page for OBS and for rendered video layers.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": { "type": "git", "url": "git+https://github.com/tsai-henry/diner-overlay.git" },
+  "homepage": "https://github.com/tsai-henry/diner-overlay#readme",
+  "keywords": ["overlay", "obs", "webcast", "robotics", "agent", "video"],
+  "engines": { "node": ">=20" },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./view": "./web/view.mjs",
+    "./server": "./src/server.mjs",
+    "./render": "./src/render.mjs",
+    "./web/*": "./web/*",
+    "./schema/*": "./schema/*",
+    "./package.json": "./package.json"
+  },
+  "bin": { "diner-overlay": "bin/diner-overlay.mjs" },
+  "files": ["bin/", "src/", "web/", "schema/", "examples/", "LICENSE", "NOTICE", "README.md"],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:browser": "DINER_OVERLAY_BROWSER=1 node --test test/*.test.mjs",
+    "selftest": "node bin/diner-overlay.mjs selftest"
+  },
+  "dependencies": {
+    "playwright-core": "1.64.0"
+  }
+}
