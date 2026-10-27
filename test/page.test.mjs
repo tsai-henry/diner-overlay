@@ -51,6 +51,23 @@ test("every visible text is 18 px or more, and the pane and the bar rest 24 px f
   }
 });
 
+test("the subtask line stays put while the clock's digits change", { skip: SKIP_BROWSER }, async () => {
+  const { chromium } = await import("playwright-core");
+  const server = await serve(Buffer.from(JSON.stringify(sample())));
+  const { browser, page } = await openPage(chromium, server.base, 1);
+  try {
+    const lefts = new Set();
+    for (const t of [1, 8, 11, 20, 44, 58]) {
+      await page.evaluate((value) => window.overlaySetTime(value), t);
+      lefts.add(await page.evaluate(() => document.querySelector(".subtask").getBoundingClientRect().left));
+    }
+    assert.equal(lefts.size, 1, `the subtask line moved: ${[...lefts]}`);
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+});
+
 test("a frame is the same whether the page stepped to it or jumped to it", { skip: SKIP_BROWSER }, async () => {
   const { chromium } = await import("playwright-core");
   const server = await serve(Buffer.from(JSON.stringify(sample())));

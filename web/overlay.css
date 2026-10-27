@@ -70,7 +70,9 @@ body { overflow: hidden; }
   display: flex; flex-direction: column; gap: 14px; text-shadow: 0 1px 8px rgba(0,0,0,0.7);
 }
 .progress-head { display: flex; align-items: baseline; gap: 28px; }
-.clock { font-size: 40px; font-weight: 600; line-height: 1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+/* D-DIN has no tabular digits, so "T+ 01:11" is 134 px and "T+ 88:88" 156 px. A fixed box keeps the subtask
+   line beside it still. */
+.clock { flex: none; width: 160px; white-space: nowrap; font-size: 40px; font-weight: 600; line-height: 1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
 .subtask { font-size: 22px; letter-spacing: 0.2em; font-weight: 600; }
 .signal { font-size: 22px; letter-spacing: 0.2em; font-weight: 700; color: var(--amber); margin-left: auto; font-variant-numeric: tabular-nums; }
 .segs, .phases { display: flex; gap: 6px; }
