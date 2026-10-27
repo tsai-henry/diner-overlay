@@ -63,6 +63,9 @@ Live and replay draw through the same function, `viewAt(timeline, t)` in `web/vi
   - `hidden_between_runs` (default `true`) hides the overlay outside a run, from `start` to the end of the
     outro. `false` keeps it on screen.
   - `outro_after_s` (default 5) is how long after `end` the outro plays.
+  - `intro_s` (default 0.6) is how long the pane takes to slide in. The bar starts 0.1 s after it and
+    takes as long.
+  - `outro_s` (default 0.5) is how long the outro takes, from the bar starting to leave to the pane gone.
 
 ## Rules the page keeps
 

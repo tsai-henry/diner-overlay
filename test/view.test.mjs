@@ -1,7 +1,7 @@
 // viewAt and its parts, on the hand-written sample timeline (examples/sample-timeline.json).
 import assert from "node:assert/strict";
 import test from "node:test";
-import { LIVE_FILL_CAP, MOTION, TIMELINE_FORMAT, callsAt, clockText, easeOut, fillFraction, liveTime, outageAt, presenceAt,
+import { LIVE_FILL_CAP, MOTION, TIMELINE_FORMAT, callsAt, clockText, easeOut, fillFraction, liveTime, motionTimes, outageAt, presenceAt,
   secondsText, timerAt, viewAt } from "../web/view.mjs";
 import { sample } from "./helpers.mjs";
 
@@ -54,6 +54,16 @@ test("the live timer piece moves the clock while it runs and holds it while paus
   const live = { ...sample(), clock: { t: 1000 }, start: 900, end: null, timer: { at: 1000, value: 30, running: true } };
   assert.equal(viewAt(live, liveTime(live, 2)).clock, "T+ 00:32");
   assert.equal(timerAt({ ...live, timer: { ...live.timer, running: false } }, 1010), 30);
+});
+
+test("show.intro_s and show.outro_s set the intro's and the outro's length", () => {
+  const timeline = { ...sample(), show: { ...sample().show, intro_s: 1.2, outro_s: 1.0 } };
+  near(presenceAt(timeline, 0.6).pane, easeOut(0.5), "the pane half way at T 0.6");
+  near(presenceAt(timeline, 1.3).bar, 1, "the bar in place at T 1.3");
+  assert.ok(presenceAt(timeline, 64 + 5 + 1.0 - 1e-6).pane < 1e-3, "the pane gone after 1.0 s");
+  assert.ok(presenceAt(timeline, 64 + 5 + 0.5).pane > 0, "the pane still there half way through the outro");
+  assert.equal(viewAt(timeline, 64 + 5 + 1.0).hidden, true);
+  assert.deepEqual(motionTimes({ intro_s: -1 }), { introS: MOTION.introS, outroS: MOTION.outroS });
 });
 
 test("the motions: intro, outro, a new call and a done flash", () => {

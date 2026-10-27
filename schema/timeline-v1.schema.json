@@ -69,7 +69,9 @@
       "type": "object",
       "properties": {
         "hidden_between_runs": { "type": "boolean", "default": true },
-        "outro_after_s": { "type": "number", "default": 5 }
+        "outro_after_s": { "type": "number", "default": 5 },
+        "intro_s": { "type": "number", "exclusiveMinimum": 0, "default": 0.6 },
+        "outro_s": { "type": "number", "exclusiveMinimum": 0, "default": 0.5 }
       }
     }
   },

@@ -24,7 +24,7 @@
 //   - outages [{kind, start, end, since?}]: periods with no signal, on the axis. kind is "robot" (the
 //     dashboard lost the robot) or "dashboard" (the page lost the dashboard). Inside one, everything is
 //     held at `start`, and a SIGNAL LOST line counts from `since` (default `start`). end null: not over.
-//   - show {hidden_between_runs, outro_after_s}: display settings.
+//   - show {hidden_between_runs, outro_after_s, intro_s, outro_s}: display settings.
 
 export const TIMELINE_FORMAT = "overlay-timeline/1";
 
@@ -32,9 +32,9 @@ export const TIMELINE_FORMAT = "overlay-timeline/1";
 // ease-out. They only move or fade things, never scale them, so text stays at its size at every moment,
 // and the 24 px margins hold whenever nothing is moving.
 export const MOTION = {
-  introS: 0.6,       // the pane slides in from the left, the bar rises from below
+  introS: 0.6,       // the pane slides in from the left, the bar rises from below (show.intro_s)
   barDelayS: 0.1,    // the bar starts this much after the pane
-  outroS: 0.5,       // the same in reverse, `show.outro_after_s` after the run ends
+  outroS: 0.5,       // the same in reverse, `show.outro_after_s` after the run ends (show.outro_s)
   paneTravelPx: 444, // the pane's width and its margin: fully off the frame
   barTravelPx: 160,  // the bar's height and its margin
   callS: 0.3,        // a new top call fades in and slides
@@ -177,20 +177,27 @@ export function callsAt(calls, t, { historyRows = 3, stageRows = 2 } = {}) {
 /* ---------- the intro and the outro ---------- */
 
 // How far in the pane and the bar are, 0 (off) to 1 (in place), at axis time t.
+// The intro's and the outro's seconds: show.intro_s and show.outro_s, else MOTION's.
+export function motionTimes(show = {}) {
+  const pick = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback);
+  return { introS: pick(show.intro_s, MOTION.introS), outroS: pick(show.outro_s, MOTION.outroS) };
+}
+
 export function presenceAt(timeline, t) {
   const show = timeline.show || {};
   if (show.hidden_between_runs === false) return { pane: 1, bar: 1 };
   if (timeline.start == null || t < timeline.start) return { pane: 0, bar: 0 };
+  const { introS, outroS } = motionTimes(show);
   const intro = t - timeline.start;
-  let pane = easeOut(intro / MOTION.introS);
-  let bar = easeOut((intro - MOTION.barDelayS) / MOTION.introS);
+  let pane = easeOut(intro / introS);
+  let bar = easeOut((intro - MOTION.barDelayS) / introS);
   if (timeline.end != null) {
-    // The outro is the intro played backwards and faster: the bar leaves first, then the pane.
+    // The outro is the intro played backwards in outroS: the bar leaves first, then the pane.
     const outro = t - (timeline.end + (show.outro_after_s ?? 5));
-    const scale = MOTION.outroS / (MOTION.introS + MOTION.barDelayS);
+    const scale = outroS / (introS + MOTION.barDelayS);
     if (outro >= 0) {
-      bar = Math.min(bar, easeOut(1 - outro / (MOTION.introS * scale)));
-      pane = Math.min(pane, easeOut(1 - (outro - MOTION.barDelayS * scale) / (MOTION.introS * scale)));
+      bar = Math.min(bar, easeOut(1 - outro / (introS * scale)));
+      pane = Math.min(pane, easeOut(1 - (outro - MOTION.barDelayS * scale) / (introS * scale)));
     }
   }
   return { pane, bar };
@@ -225,7 +232,7 @@ export function viewAt(timeline, t) {
   const outage = outageAt(timeline, t);
   if (!outage) return viewAtTime(timeline, t);
   // A loss from before the run lets the intro play, then holds, so the SIGNAL LOST line is seen.
-  const introEnd = timeline.start == null ? -Infinity : timeline.start + MOTION.introS + MOTION.barDelayS;
+  const introEnd = timeline.start == null ? -Infinity : timeline.start + motionTimes(timeline.show).introS + MOTION.barDelayS;
   const view = viewAtTime(timeline, Math.max(outage.start, Math.min(t, introEnd)));
   return {
     ...view,
